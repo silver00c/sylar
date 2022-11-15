@@ -10,6 +10,7 @@
 
 namespace sylar{
 
+class Logger;
 //日志事件
 class LogEvent {
 public:
@@ -22,7 +23,9 @@ public:
     uint32_t getThreadId() const { return m_threadId;}
     uint32_t getFiberId() const { return m_fiberId;}
     uint64_t getTime() const { return m_time;}
-    const std::string& getContent() const { return m_content;} 
+    const std::string& getContent() const { return m_content;}
+
+	const std::string& getName() const { return m_name;} 
 private:
     const char* m_file = nullptr;//文件名
     int32_t m_line = 0;          //行号
@@ -54,13 +57,14 @@ public:
     typedef std::shared_ptr<LogFormatter> ptr;
     LogFormatter(const std::string& pattern);
 
-    std::string format(LogLevel::Level level, LogEvent::ptr event);
+    std::string format(std::shared_ptr<Logger> logger, LogLevel::Level level, LogEvent::ptr event);
 public:
     class FormatItem {
     public:
         typedef std::shared_ptr<FormatItem> ptr;
+        FormatItem(const std::string& fmt = "");
         virtual ~FormatItem() {};
-        virtual void format(std::ostream& os,LogLevel::Level level, LogEvent::ptr event) = 0;
+        virtual void format(std::ostream& os, std::shared_ptr<Logger> logger, LogLevel::Level level, LogEvent::ptr event) = 0;
     };
 
     void init();
@@ -76,7 +80,7 @@ public:
     typedef std::shared_ptr<LogAppender> ptr;
     virtual ~LogAppender() {};
 
-    virtual void log(LogLevel::Level level, LogEvent::ptr event) = 0;
+    virtual void log(std::shared_ptr<Logger> logger, LogLevel::Level level, LogEvent::ptr event) = 0;
 
     void setFormatter(LogFormatter::ptr val) { m_formatter = val;}
     LogFormatter::ptr getFormatter() const { return m_formatter;}
