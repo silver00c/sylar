@@ -35,4 +35,12 @@ fstream
 -
 vector
 -
+stdarg.h
+-
+map
+-
+singleton.h
+/root/sylar/sylar/singleton.h
+
+/root/sylar/sylar/singleton.h
 

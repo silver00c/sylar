@@ -21,10 +21,34 @@ fstream
 -
 vector
 -
+stdarg.h
+-
+map
+-
+singleton.h
+/root/sylar/sylar/singleton.h
+
+/root/sylar/sylar/singleton.h
+
+/root/sylar/sylar/util.h
+pthread.h
+-
+unistd.h
+-
+sys/types.h
+-
+sys/syscall.h
+-
+stdio.h
+-
+stdint.h
+-
 
 /root/sylar/tests/test.cc
 iostream
 -
 ../sylar/log.h
 /root/sylar/sylar/log.h
+../sylar/util.h
+/root/sylar/sylar/util.h
 

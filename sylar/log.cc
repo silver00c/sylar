@@ -26,6 +26,34 @@ const char* LogLevel::ToString(LogLevel::Level level) {
     return "UNKNOW";
 }
 
+LogEventWrap::LogEventWrap(LogEvent::ptr e)
+    :m_event(e) {
+}
+
+LogEventWrap::~LogEventWrap() {
+    m_event->getLogger()->log(m_event->getLevel(), m_event);
+}
+
+void LogEvent::format(const char* fmt, ...) {
+    va_list al;
+    va_start(al, fmt);
+    format(fmt, al);
+    va_end(al);
+}
+
+void LogEvent::format(const char* fmt, va_list al) {
+    char* buf = nullptr;
+    int len = vasprintf(&buf, fmt, al);
+    if(len != -1) {
+        m_ss << std::string(buf, len);
+        free(buf);
+    }
+}
+
+std::stringstream& LogEventWrap::getSS() {
+    return m_event->getSS();
+}
+
 class MessageFormatItem : public LogFormatter::FormatItem {
 public:
     MessageFormatItem(const std::string& str = "") {}
@@ -131,20 +159,32 @@ private:
     std::string m_string;
 };
 
-LogEvent::LogEvent(const char* file, int32_t line, uint32_t elapse
+class TabFormatItem : public LogFormatter::FormatItem {
+public:
+    TabFormatItem(const std::string& str="") {}
+    void format(std::ostream& os, Logger::ptr logger, LogLevel::Level level, LogEvent::ptr event) override {
+        os << "\t";
+    }
+private:
+    std::string m_string;
+};
+
+LogEvent::LogEvent(std::shared_ptr<Logger> logger, LogLevel::Level level, const char* file, int32_t line, uint32_t elapse
             , uint32_t thread_id, uint32_t fiber_id, uint64_t time)
     :m_file(file)
     ,m_line(line)
     ,m_elapse(elapse)
     ,m_threadId(thread_id)
     ,m_fiberId(fiber_id)
-    ,m_time(time) {
+    ,m_time(time)
+    ,m_logger(logger)
+    ,m_level(level) {
 }
 
 Logger::Logger(const std::string& name)
     :m_name(name)
     ,m_level(LogLevel::DEBUG) {
-    m_formatter.reset(new LogFormatter("%d  [%p] <%f:%l>    %m %n"));
+    m_formatter.reset(new LogFormatter("%d{%Y-%m-%d %H:%M:%S}%T%t%T%F%T[%p]%T[%c]%T%f:%l%T%m%n"));//时间 线程号 协程号 级别 文件名 行 消息 新行
 }
 
 void Logger::addAppender(LogAppender::ptr appender) {
@@ -165,7 +205,7 @@ void Logger::delAppender (LogAppender::ptr appender) {
 
 void Logger::log(LogLevel::Level level, LogEvent::ptr event) {
     if(level >= m_level) {
-        auto self = shared_from_this();//���ָ���Լ��ĳ�Ա����ָ�룿
+        auto self = shared_from_this();//���ָ���Լ��ĳ�Ա����ָ��?
         for(auto& i : m_appenders) {
             i->log(self, level, event);
         }
@@ -194,6 +234,7 @@ void Logger::fatal(LogEvent::ptr event) {
 
 FileLogAppender::FileLogAppender(const std::string& filename)
     :m_filename(filename) {
+        reopen();
 }
 
 void FileLogAppender::log(std::shared_ptr<Logger> logger, LogLevel::Level level, LogEvent::ptr event) {
@@ -207,7 +248,7 @@ bool FileLogAppender::reopen() {
         m_filestream.close();
     }
     m_filestream.open(m_filename);
-    return !!m_filestream;//!! 双叹�??
+    return !!m_filestream;//!! 双叹�???
 }
 
 void StdoutLogAppender::log(std::shared_ptr<Logger> logger, LogLevel::Level level, LogEvent::ptr event) {
@@ -230,73 +271,80 @@ std::string LogFormatter::format(std::shared_ptr<Logger> logger, LogLevel::Level
     return ss.str();
 }
 
-//%xxx %xxx{xxx} %%
+//%xxx %xxx{xxx} %%     //%d  [%p] <%f:%l>    %m %n
 void LogFormatter::init() {
     //str, format, type
     std::vector<std::tuple<std::string, std::string, int> > vec;
-    std::string nstr;//处理后的字�?�串�?
+    std::string nstr;//处理后的字符串
     for(size_t i = 0; i < m_pattern.size(); ++i) {
-        if(m_pattern[i] != '%') {
+        if(m_pattern[i] != '%') {               //非%的内容直接放入nstr
             nstr.append(1, m_pattern[i]);
             continue;
         }
         //%...
-        if((i + 1) < m_pattern.size()) {
-            if(m_pattern[i+1] == '%') {//%%
+        if((i + 1) < m_pattern.size()) {        //如果是%%则直接将%放入nstr
+            if(m_pattern[i + 1] == '%') {//%%
                 nstr.append(1, '%');
                 continue;
             }
         }
 
-        size_t n = i + 1;
-        int fmt_status = 0;//处理状�? 0�? 1�?
-        size_t fmt_begin = 0;//记录开始�?�理的位�?
+        size_t n = i + 1;           //对于%后的字符串
+        int fmt_status = 0;         //处理状态 
+        size_t fmt_begin = 0;       //记录开始处理的位置??
 
         std::string str;
         std::string fmt;
         while(n < m_pattern.size()) {
-            if(!isalpha(m_pattern[n]) && m_pattern[n] != '{' 
-                    && m_pattern[n] != '}') {
+            if(!fmt_status && (!isalpha(m_pattern[n]) && m_pattern[n] != '{' 
+                    && m_pattern[n] != '}')) {//处理非字母、非{、非}
+                str = m_pattern.substr(i + 1, n - i - 1);
                 break;
             }
             if(fmt_status == 0) {
                 if(m_pattern[n] == '{') {
-                    str = m_pattern.substr(i + 1, n - i -1);
-                    fmt_status = 1;//������ʽ
+                    str = m_pattern.substr(i + 1, n - i -1); 
+                    fmt_status = 1;//解析格式
                     fmt_begin = n;
                     ++n;
                     continue;
                 }
-            }
-            if(fmt_status == 1) {
+            }else if(fmt_status == 1) {
                 if(m_pattern[n] == '}') {
                     fmt = m_pattern.substr(fmt_begin + 1, n - fmt_begin - 1);
-                    fmt_status = 2;
+                    //std::cout << "#" << fmt << std::endl;
+                    fmt_status = 0;
+                    ++n;
                     break;
                 }
             }
             ++n;
+            if(n == m_pattern.size()) {
+                if(str.empty()) {
+                    str = m_pattern.substr(i + 1);
+                }
+            }
         }
 
         if(fmt_status == 0) {
             if(!nstr.empty()) {
                 vec.push_back(std::make_tuple(nstr, std::string(), 0));
                 nstr.clear();
-            }
-            str = m_pattern.substr(i + 1, n - i - 1);
+            }//str = m_pattern.substr(i + 1, n - i - 1);
             vec.push_back(std::make_tuple(str, fmt, 1));
             i = n - 1;
         } else if(fmt_status == 1) {
             std::cout << "pattern parse error: " << m_pattern << " - " << m_pattern.substr(i) << std::endl;
             vec.push_back(std::make_tuple("<<pattern_error>>", fmt, 0));
-        } else if(fmt_status == 2) { 
-            if(!nstr.empty()) {
-                vec.push_back(std::make_tuple(nstr, "", 0));
-                nstr.clear();
-            }
-            vec.push_back(std::make_tuple(str, fmt, 1));
-            i = n - 1;
         }
+        //  else if(fmt_status == 2) { 
+        //     if(!nstr.empty()) {
+        //         vec.push_back(std::make_tuple(nstr, "", 0));
+        //         nstr.clear();
+        //     }
+        //     vec.push_back(std::make_tuple(str, fmt, 1));
+        //     i = n - 1;
+        // }
     }
 
     if(!nstr.empty()) {
@@ -315,13 +363,15 @@ void LogFormatter::init() {
         XX(d, DateTimeFormatItem),
         XX(f, FilenameFormatItem),
         XX(l, LineFormatItem),
+        XX(T, TabFormatItem),
+        XX(F, FiberIdFormatItem),
 #undef XX
     };
     
     for(auto& i : vec) {
-        if(std::get<2>(i) == 0) {
+        if(std::get<2>(i) == 0) {//将type为0的三元组中的str装入m_items
             m_items.push_back(FormatItem::ptr(new StringFormatItem(std::get<0>(i))));
-        } else {
+        } else {                 //将type为1的三元组中的
             auto it = s_format_items.find(std::get<0>(i));
             if(it == s_format_items.end()) {
                 m_items.push_back(FormatItem::ptr(new StringFormatItem("<<error_format %" + std::get<0>(i) + ">>")));
@@ -330,9 +380,18 @@ void LogFormatter::init() {
             }
         }
 
-        std::cout << "(" << std::get<0>(i) << ") - (" << std::get<1>(i) << ") - (" << std::get<2>(i) << ")" << std::endl;
+        //std::cout << "(" << std::get<0>(i) << ") - (" << std::get<1>(i) << ") - (" << std::get<2>(i) << ")" << std::endl;
     }
-    std::cout << m_items.size() << std::endl;
+    //std::cout << m_items.size() << std::endl;
+}
+
+LoggerManager::LoggerManager() {
+    m_root.reset(new Logger);
+    m_root->addAppender(LogAppender::ptr(new StdoutLogAppender));
+}
+Logger::ptr LoggerManager::getLogger(const std::string& name) {
+    auto it = m_loggers.find(name);
+    return it == m_loggers.end() ? m_root : it->second;
 }
 
 }

@@ -7,6 +7,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}  -std=c++0x")
 
 set(LIB_SRC
     sylar/log.cc
+    sylar/util.cc
     )
 
 add_library(sylar SHARED ${LIB_SRC})
