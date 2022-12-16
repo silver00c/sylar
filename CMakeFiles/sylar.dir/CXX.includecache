@@ -6,19 +6,21 @@
 
 #IncludeRegexTransform: 
 
-/root/sylar/sylar/log.cc
+/root/sylar/sylar/config.cc
+config.h
+/root/sylar/sylar/config.h
+
+/root/sylar/sylar/config.h
+memory
+-
+string
+-
+sstream
+-
+boost/lexical_cast.hpp
+-
 log.h
 /root/sylar/sylar/log.h
-map
--
-iostream
--
-functional
--
-time.h
--
-string.h
--
 
 /root/sylar/sylar/log.h
 string
@@ -41,6 +43,22 @@ map
 -
 singleton.h
 /root/sylar/sylar/singleton.h
+util.h
+/root/sylar/sylar/util.h
 
 /root/sylar/sylar/singleton.h
+
+/root/sylar/sylar/util.h
+pthread.h
+-
+unistd.h
+-
+sys/types.h
+-
+sys/syscall.h
+-
+stdio.h
+-
+stdint.h
+-
 
