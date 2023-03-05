@@ -1,1 +1,1 @@
-/usr/bin/c++    -std=c++0x  -rdynamic CMakeFiles/test_config.dir/tests/test_config.cc.o  -o bin/test_config -Wl,-rpath,/root/sylar/lib lib/libsylar.so 
+/apps/sylar/bin/g++    -std=c++0x  -rdynamic CMakeFiles/test_config.dir/tests/test_config.cc.o  -o bin/test_config -Wl,-rpath,/root/sylar/lib lib/libsylar.so -lyaml-cpp 

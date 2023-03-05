@@ -1,12 +1,45 @@
-#include "../sylar/config.h"
-#include "../sylar/log.h"
+# Sylar
+
+## 一、日志系统
+
+## 二、配置系统
+### yaml
+下载安装yaml
+
+修改/创建bin/conf/log.yml，后面要解析这个文件
+```
+logs:
+    - name: root
+      level: info
+      formatter: %d%T%m%n
+      appender:
+          - type: FileLogAppender
+            file: log.txt
+          - type: StdoutLogAppender
+    - name: system
+      level: debug
+      formatter: %d%T%m%n
+      appender:
+          - type: FileLogAppender
+            file: log.txt
+          - type: StdoutLogAppender
+```
+修改cmake做yaml测试
+```
+#添加yaml的一些实现， 逻辑不清
+include_directories(/apps/sylar/include)
+
+target_link_libraries(test_config sylar yaml-cpp)
+```
+
+修改yaml_cpp测试程序
+
+```
+#/root/sylar/tests/test_config.cc
+
 #include <yaml-cpp/yaml.h>
 
-sylar::ConfigVar<int>::ptr g_int_value_config = 
-    sylar::Config::Lookup("system.port", (int)8080, "system port");
-
-sylar::ConfigVar<float>::ptr g_float_value_config = 
-    sylar::Config::Lookup("system.port", (float)10.2f, "system value");
+······
 
 void print_yaml(const YAML::Node& node, int level) {
     if(node.IsScalar()) {
@@ -15,7 +48,7 @@ void print_yaml(const YAML::Node& node, int level) {
     } else if(node.IsNull()) {
         SYLAR_LOG_INFO(SYLAR_LOG_ROOT()) << std::string(level * 4, ' ')
             << "NULL - " << node.Type() << " - " << level;
-    } else if(node.IsMap()) {
+    } else if(node.IsMap()) {//map结构
         for(auto it = node.begin();
                 it != node.end(); ++it) {
             SYLAR_LOG_INFO(SYLAR_LOG_ROOT()) << std::string(level * 4, ' ')
@@ -37,19 +70,10 @@ void test_yaml() {
     //SYLAR_LOG_INFO(SYLAR_LOG_ROOT()) << root;
 }
 
-void test_config() {
-    SYLAR_LOG_INFO(SYLAR_LOG_ROOT()) << "before: " << g_int_value_config->getValue();
-    SYLAR_LOG_INFO(SYLAR_LOG_ROOT()) << "before: " << g_float_value_config->toString();
-
-    YAML::Node root = YAML::LoadFile("/root/sylar/bin/conf/log.yaml");
-    sylar::Config::LoadFromYaml(root);
-
-    SYLAR_LOG_INFO(SYLAR_LOG_ROOT()) << "after: " << g_int_value_config->getValue();
-    SYLAR_LOG_INFO(SYLAR_LOG_ROOT()) << "after: " << g_float_value_config->toString();
-}
-
 int main(int argc, char** argvs) {
-    test_config();
-    //test_yaml();
+    // SYLAR_LOG_INFO(SYLAR_LOG_ROOT()) << g_int_value_config->getValue();
+    // SYLAR_LOG_INFO(SYLAR_LOG_ROOT()) << g_float_value_config->toString();
+    test_yaml();
     return 0;
 }
+```

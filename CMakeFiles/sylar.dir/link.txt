@@ -1,1 +1,1 @@
-/usr/bin/c++ -fPIC   -std=c++0x  -shared -Wl,-soname,libsylar.so -o lib/libsylar.so CMakeFiles/sylar.dir/sylar/log.cc.o CMakeFiles/sylar.dir/sylar/util.cc.o CMakeFiles/sylar.dir/sylar/config.cc.o 
+/apps/sylar/bin/g++ -fPIC   -std=c++0x  -shared -Wl,-soname,libsylar.so -o lib/libsylar.so CMakeFiles/sylar.dir/sylar/log.cc.o CMakeFiles/sylar.dir/sylar/util.cc.o CMakeFiles/sylar.dir/sylar/config.cc.o 
