@@ -1,2 +1,2 @@
-2023-03-05 12:30:11	ERROR	test macro error
-2023-03-05 12:30:11	ERROR	test macro fmt error aa
+2023-03-08 12:18:32	ERROR	test macro error
+2023-03-08 12:18:32	ERROR	test macro fmt error aa

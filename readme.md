@@ -2,6 +2,24 @@
 
 ## 一、日志系统
 
+```
+//  sylar/log.h
+LogEvent   
+|
+LogLevel
+|
+LogFormatter
+|
+LogAppender 
+        |
+        StdoutLogAppender
+        |
+        FileLogAppender
+Logger
+
+
+```
+
 ## 二、配置系统
 ### yaml
 下载安装yaml
@@ -76,4 +94,19 @@ int main(int argc, char** argvs) {
     test_yaml();
     return 0;
 }
+```
+
+## 配置系统 复杂类型的支持
+配置系统的原则：约定优于配置
+
+```cpp
+//抽象出来转化方法
+template<T, FromStr, ToStr>
+class Config;
+
+//通用的转化模式，并给出默认实现
+template<F, T>
+LexicalCast;
+
+//容器偏特化，目前支持vector
 ```
