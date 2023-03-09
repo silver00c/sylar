@@ -19,3 +19,14 @@ system:
   int_vec: 
     - 15
     - 20
+  int_list: [20, 40, 60]
+  int_set: [40, 20, 20, 30]
+  int_uset: [40, 20, 20, 70,30]
+  str_int_map:
+      k : 40
+      k2 : 10
+      k3 : 20
+  str_int_umap:
+      k : 140
+      k2 : 110
+      k3 : 120      

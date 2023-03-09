@@ -111,4 +111,14 @@ LexicalCast;
 //容器偏特化，目前支持vector
 ```
 
-加油！
+加油！ 
+
+***
+
+## 配置系统 更多stl容器支持
+```
+//使得容器偏特化支持更多类型：list, set, unordered_set, map, unorded_map
+//map, unorded_map支持 key = std::string 偏特化
+//遗留问题：Config::Lookup(key), key相同, 类型不同的, 不会有报错
+```
+
