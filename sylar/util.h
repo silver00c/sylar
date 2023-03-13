@@ -8,10 +8,11 @@
 #include <stdio.h>
 #include <stdint.h>
 
-namespace sylar{
+namespace sylar {
 
-    pid_t GetThreadId();
-    uint32_t GetFiberId();
+pid_t GetThreadId();
+uint32_t GetFiberId();
+
 }
 
 #endif

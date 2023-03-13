@@ -1,5 +1,5 @@
-#ifndef __SYLAR__SINGLETON_H__
-#define __SYLAR__SINGLETON_H__
+#ifndef __SYLAR_SINGLETON_H__
+#define __SYLAR_SINGLETON_H__
 
 namespace sylar {
 
