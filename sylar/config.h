@@ -30,7 +30,7 @@ public:
     const std::string& getName() const { return m_name;}
     const std::string& getDescription() const { return m_description;}
 
-    virtual std::string toString() = 0;
+    virtual std::string toString() = 0;//序列化和反序列化
     virtual bool fromString(const std::string& val) = 0;
     virtual std::string getTypeName() const = 0;
 protected:
