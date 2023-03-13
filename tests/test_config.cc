@@ -6,6 +6,9 @@
 sylar::ConfigVar<int>::ptr g_int_value_config = 
     sylar::Config::Lookup("system.port", (int)8080, "system port");
 
+sylar::ConfigVar<int>::ptr g_int_valuex_config = 
+   sylar::Config::Lookup("system.port", (int)8080, "system port");
+
 sylar::ConfigVar<float>::ptr g_float_value_config = 
     sylar::Config::Lookup("system.port", (float)10.2f, "system value");
 
@@ -104,5 +107,7 @@ void test_config() {
 int main(int argc, char** argvs) {
     test_config();
     //test_yaml();
+    // sylar::ConfigVar<int>::ptr p = nullptr;
+    // p->getValue();
     return 0;
 }
