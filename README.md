@@ -125,3 +125,9 @@ LexicalCast;
 
 # log&config类图
 <img src="img/53T_VUK}LD~B3}ZVI8DJEGD.png" title="log&config类图">
+
+**********
+
+## 线程库
+
+Thread, Mutex
