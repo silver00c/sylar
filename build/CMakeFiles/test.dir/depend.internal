@@ -4,5 +4,6 @@
 CMakeFiles/test.dir/tests/test.cc.o
  .././sylar/log.h
  .././sylar/singleton.h
+ .././sylar/thread.h
  .././sylar/util.h
  /root/sylar/tests/test.cc
