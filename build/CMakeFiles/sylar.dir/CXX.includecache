@@ -75,6 +75,8 @@ semaphore.h
 -
 stdint.h
 -
+atomic
+-
 
 .././sylar/util.h
 pthread.h
@@ -166,14 +168,6 @@ thread.h
 
 /root/sylar/sylar/singleton.h
 
-/root/sylar/sylar/thread.cc
-thread.h
-/root/sylar/sylar/thread.h
-log.h
-/root/sylar/sylar/log.h
-util.h
-/root/sylar/sylar/util.h
-
 /root/sylar/sylar/thread.h
 thread
 -
@@ -186,6 +180,8 @@ pthread.h
 semaphore.h
 -
 stdint.h
+-
+atomic
 -
 
 /root/sylar/sylar/util.h
